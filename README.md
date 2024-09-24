@@ -37,7 +37,7 @@ export $(<.env grep -v "^#" | xargs)
 ```bash
 # Deploy AKS and ACR
 export $(<.env grep -v "^#" | xargs)
-az deployment sub create -l swedencentral -f aks.bicep -p  aks.bicepparam -n radius-poc-aks-1
+az deployment sub create -l $LOCATION -f aks.bicep -p  aks.bicepparam -n radius-poc-aks-1
 ```
 ### 3 - provision App backend services
 Includes the following services:
@@ -49,14 +49,14 @@ Includes the following services:
 
 ```bash
 # Deploy Radius application backend services
-az deployment sub create -l swedencentral -f app.bicep -p  app.bicepparam -n radius-poc-app-1
+az deployment sub create -l $LOCATION -f app.bicep -p  app.bicepparam -n radius-poc-app-1
 ```
 
 ### 4 - Export secrets and other variables to dotenv file and export all variables
 
 ```bash
 # Export environment variables (secrets, connection strings, resources ids, etc.) to dotenv file
-az deployment sub create -l swedencentral -f get-secrets.bicep -p  get-secrets.bicepparam -n radius-poc-get-secrets-1 --query properties.outputs.my_secrets.value -o tsv > ${ENV_NAME:-default}.env
+az deployment sub create -l $LOCATION -f get-secrets.bicep -p  get-secrets.bicepparam -n radius-poc-get-secrets-1 --query properties.outputs.my_secrets.value -o tsv > ${ENV_NAME:-default}.env
 export $(<${ENV_NAME:-default}.env grep -v "^#" | xargs)
 ```
 
@@ -104,7 +104,7 @@ kubectl patch serviceaccount acr-service-account -p '{"imagePullSecrets": [{"nam
 az acr import --name $ACR_NAME --source docker.io/library/nginx:latest --image nginx:v1
 
 # create deployment
-envsubst < test-app.yaml  | kubectl delete -f -
+envsubst < test-app.yaml  | kubectl apply -f -
 
 # check deployment to confirm that pods are running
 kubectl get all

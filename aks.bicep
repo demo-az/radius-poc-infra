@@ -65,7 +65,7 @@ module aks 'br/public:avm/res/container-service/managed-cluster:0.3.0' = {
         count: 1
         mode: 'System'
         name: 'systempool'
-        vmSize: 'Standard_DS2_v2'
+        vmSize: 'Standard_D2s_v3'
       }
     ]
     managedIdentities: {
