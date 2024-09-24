@@ -14,4 +14,5 @@ param postgresqlSku = {
   skuName: 'Standard_D2ds_v4'
   tier: 'GeneralPurpose'
 }
+param kvAdminGroupObjectId = readEnvironmentVariable('KV_ADMIN_GROUP_OBJECT_ID')
 

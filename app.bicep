@@ -45,6 +45,9 @@ param postgresqlSku object
 
 var rgAppName = '${abbrs.resourcesResourceGroups}app-${name}'
 
+@description('Object ID of the Entra ID group that will be granted kv policy')
+param kvAdminGroupObjectId string = ''
+
 resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: rgAppName
   location: location
@@ -62,7 +65,7 @@ var blobStorageAccountName = take('${abbrs.storageStorageAccounts}blob${toLower(
 var queueStorageAccountName = take('${abbrs.storageStorageAccounts}queue${toLower(replace(suffix, '-', ''))}', 24)
 var serviceBusNamespace = '${abbrs.serviceBusNamespaces}${suffix}'
 var postgresServerName = '${abbrs.dBforPostgreSQLServers}${suffix}'
-//var keyVaultName = '${abbrs.keyVaultVaults}${resourceToken}'
+var keyVaultName = take('${abbrs.keyVaultVaults}${suffix}', 24)
 
 // storage account with blob storage services and containers provided in parameters
 module blobStorage 'br/public:avm/res/storage/storage-account:0.13.2' = {
@@ -159,8 +162,39 @@ module postgreSql 'br/public:avm/res/db-for-postgre-sql/flexible-server:0.3.0' =
   }
 }
 
+module kv 'br/public:avm/res/key-vault/vault:0.9.0' = {
+  scope: rg
+  name: 'keyvault-${resourceToken}'
+  params: {
+    name: keyVaultName
+    enableSoftDelete: false
+    enableRbacAuthorization: false
+    publicNetworkAccess: 'Enabled'
+    
+    accessPolicies: [
+      {
+        objectId: kvAdminGroupObjectId
+        permissions: {
+          secrets: [
+            'all'
+          ]
+          keys: [
+            'all'
+          ]
+          storage: [
+            'all'
+          ]
+          certificates: [
+            'all'
+          ]
+        }
+      }
+    ]
+  }
+}
 
 // Outputs
 output blobStorageAccountId string = blobStorage.outputs.resourceId
 output queueStorageAccountId string = queueStorage.outputs.resourceId
 output serviceBusNamespaceId string = serviceBus.outputs.resourceId
+output kvId string = kv.outputs.resourceId
