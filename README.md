@@ -28,6 +28,9 @@ SERVICE_BUS_QUEUES=[\"queue-a\",\"queue-b\"]
 DATABASES=[\"database-1\",\"database-2\"]
 PG_ADMIN_USER="pgadmin"
 PG_ADMIN_PASSWORD="xxxxxxxxx"
+
+# KeyVault
+KV_ADMIN_GROUP_OBJECT_ID="00000000-0000-0000-0000-000000000000"
 ```	
 ```bash
 # Load environment variables from .env file
