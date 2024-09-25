@@ -25,6 +25,7 @@ var blobStorageAccountName = take('${abbrs.storageStorageAccounts}blob${toLower(
 var queueStorageAccountName = take('${abbrs.storageStorageAccounts}queue${toLower(replace(suffix, '-', ''))}', 24)
 var serviceBusNamespace = '${abbrs.serviceBusNamespaces}${suffix}'
 var postgresServerName = '${abbrs.dBforPostgreSQLServers}${suffix}'
+var appConfigStoreName = '${abbrs.appConfigurationStores}${suffix}'
 
 
 var aksClusterName = '${abbrs.containerServiceManagedClusters}${suffix}'
@@ -74,9 +75,15 @@ resource pgServer 'Microsoft.DBforPostgreSQL/flexibleServers@2024-03-01-preview'
   name: postgresServerName
 }
 
+resource appConfigStore 'Microsoft.AppConfiguration/configurationStores@2023-09-01-preview' existing = {
+  scope: rgApp
+  name: appConfigStoreName
+}
+
 var blobStorageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${blobStorage.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${blobStorage.listKeys().keys[0].value}'
 var queueStorageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${queueStorage.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${queueStorage.listKeys().keys[0].value}'
 var serviceBusConnectionString = serviceBusAuthorizationRule.listKeys().primaryConnectionString
+var appConfigStoreConnectionString = appConfigStore.listKeys().value[0].connectionString
 
 
 output my_secrets array = [
@@ -111,7 +118,9 @@ output my_secrets array = [
   'PG_SERVER_ID="${pgServer.id}"'
   'PG_ADMIN=${pgAdmin}'
   'PG_PASSWORD=${pgPassword}'
-
+  ''
+  '# appConfigStore'
+  'APP_CONFIG_STORE_CONNECTION_STRING=${appConfigStoreConnectionString}'
 ]
 
 // output AKS_CLUSTER_ID string = aksCluster.id

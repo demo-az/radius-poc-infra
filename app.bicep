@@ -66,6 +66,7 @@ var queueStorageAccountName = take('${abbrs.storageStorageAccounts}queue${toLowe
 var serviceBusNamespace = '${abbrs.serviceBusNamespaces}${suffix}'
 var postgresServerName = '${abbrs.dBforPostgreSQLServers}${suffix}'
 var keyVaultName = take('${abbrs.keyVaultVaults}${suffix}', 24)
+var appConfigStoreName = '${abbrs.appConfigurationStores}${suffix}'
 
 // storage account with blob storage services and containers provided in parameters
 module blobStorage 'br/public:avm/res/storage/storage-account:0.13.2' = {
@@ -193,8 +194,21 @@ module kv 'br/public:avm/res/key-vault/vault:0.9.0' = {
   }
 }
 
+module appConfigStore 'br:mcr.microsoft.com/bicep/avm/res/app-configuration/configuration-store:0.5.0' = {
+  scope: rg
+  name: 'appConfigStore-${resourceToken}'
+  params: {
+    name: appConfigStoreName
+    publicNetworkAccess: 'Enabled'
+    enablePurgeProtection: false
+    sku: 'Standard'
+    disableLocalAuth: false
+  }
+}
+
 // Outputs
 output blobStorageAccountId string = blobStorage.outputs.resourceId
 output queueStorageAccountId string = queueStorage.outputs.resourceId
 output serviceBusNamespaceId string = serviceBus.outputs.resourceId
 output kvId string = kv.outputs.resourceId
+output appConfigStoreId string = appConfigStore.outputs.resourceId
