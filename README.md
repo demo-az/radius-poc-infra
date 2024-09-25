@@ -36,8 +36,7 @@ export $(<.env grep -v "^#" | xargs)
 ### 2 - provision AKS and ACR
 ```bash
 # Deploy AKS and ACR
-export $(<.env grep -v "^#" | xargs)
-az deployment sub create -l $LOCATION -f aks.bicep -p  aks.bicepparam -n radius-poc-aks-1
+az deployment sub create -l $LOCATION -f aks.bicep -p  aks.bicepparam -n "$ENV_NAME-aks-deployment-1"
 ```
 ### 3 - provision App backend services
 Includes the following services:
@@ -49,14 +48,14 @@ Includes the following services:
 
 ```bash
 # Deploy Radius application backend services
-az deployment sub create -l $LOCATION -f app.bicep -p  app.bicepparam -n radius-poc-app-1
+az deployment sub create -l $LOCATION -f app.bicep -p  app.bicepparam -n "$ENV_NAME-app-deployment-1"
 ```
 
 ### 4 - Export secrets and other variables to dotenv file and export all variables
 
 ```bash
 # Export environment variables (secrets, connection strings, resources ids, etc.) to dotenv file
-az deployment sub create -l $LOCATION -f get-secrets.bicep -p  get-secrets.bicepparam -n radius-poc-get-secrets-1 --query properties.outputs.my_secrets.value -o tsv > ${ENV_NAME:-default}.env
+az deployment sub create -l $LOCATION -f get-secrets.bicep -p  get-secrets.bicepparam -n "$ENV_NAME-get-secrets-deployment-1" --query properties.outputs.my_secrets.value -o tsv > ${ENV_NAME:-default}.env
 export $(<${ENV_NAME:-default}.env grep -v "^#" | xargs)
 ```
 
